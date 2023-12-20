@@ -399,3 +399,150 @@ INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
 INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
 INFO:root:Send to 26.248.77.200:15600 -> LOGOUT ahmed
 ERROR:root:OSError: [WinError 10038] An operation was attempted on something that is not a socket
+INFO:root:Send to 26.248.77.200:15600 -> LOGIN ahmed 123 3016
+INFO:root:Received from 26.248.77.200 -> login-success
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15600 -> LOGOUT ahmed
+ERROR:root:OSError: [WinError 10038] An operation was attempted on something that is not a socket
+INFO:root:Send to 26.248.77.200:15600 -> LOGIN ahmed 123 3016
+INFO:root:Received from 26.248.77.200 -> login-success
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15600 -> LOGOUT ahmed
+ERROR:root:OSError: [WinError 10038] An operation was attempted on something that is not a socket
+INFO:root:Send to 26.248.77.200:15600 -> LOGIN ahmed 123 3015
+INFO:root:Received from 26.248.77.200 -> login-success
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15600 -> LOGIN mo 456 3020
+INFO:root:Received from 26.248.77.200 -> login-account-not-exist
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15600 -> JOIN mo 456
+INFO:root:Received from 26.248.77.200 -> join-success
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15600 -> LOGIN mo 456 3040
+INFO:root:Received from 26.248.77.200 -> login-success
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15600 -> SEARCH ahmed
+INFO:root:Received from 26.248.77.200 -> search-success 26.248.77.200:3015
+INFO:root:Send to 26.248.77.200:3015 -> CHAT-REQUEST 3040 mo
+INFO:root:Received from 26.248.77.200 -> CHAT-REQUEST 3040 mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200 -> OK ahmed
+INFO:root:Received from 26.248.77.200:3015 -> OK ahmed
+INFO:root:Send to 26.248.77.200:3040 -> OK
+INFO:root:Received from None -> OK
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Received from None -> hi
+ -> hi
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Received from 26.248.77.200 -> mesa
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:3015 -> REJECT
+INFO:root:Received from 26.248.77.200 -> REJECT
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:3015 -> REJECT
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Received from None -> REJECT
+REJECT
+INFO:root:Send to 26.248.77.200:3040 -> :q
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:3015 -> REJECT
+INFO:root:Send to 26.248.77.200:3015 -> :q
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO mo
+INFO:root:Send to 26.248.77.200:15600 -> LOGOUT mo
+ERROR:root:OSError: [WinError 10038] An operation was attempted on something that is not a socket
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15500 -> HELLO ahmed
+INFO:root:Send to 26.248.77.200:15600 -> LOGOUT ahmed
+ERROR:root:OSError: [WinError 10038] An operation was attempted on something that is not a socket
