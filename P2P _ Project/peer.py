@@ -374,7 +374,8 @@ class peerMain:
             # The user sends the request to the server and the server shall respond with a message containing the users
             elif choice=="6" and self.isOnline:
                 msg = self.getOnlinePeers()
-                print(msg)
+                print(msg + '\n\n')
+                
 
             # if this is the receiver side then it will get the prompt to accept an incoming request during the main loop
             # that's why response is evaluated in main process not the server thread even though the prompt is printed by server
@@ -447,7 +448,7 @@ class peerMain:
             message = "LOGOUT " + self.loginCredentials[0]
             self.timer.cancel()
         else:
-            message = "LOGOUT"
+            message = "LOGOUT" + ' logout'
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
         self.tcpClientSocket.send(message.encode())
         
@@ -473,7 +474,7 @@ class peerMain:
             return None
         
     def getOnlinePeers(self):
-        message = "ONLINE" + 'online'
+        message = "ONLINE" + ' online'
         self.tcpClientSocket.send(message.encode())
         response = self.tcpClientSocket.recv(1024).decode()
         return ("Online Peers: " + response)

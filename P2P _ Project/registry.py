@@ -157,7 +157,8 @@ class ClientThread(threading.Thread):
                         self.tcpClientSocket.send(response.encode())
 
                 elif message[0] == "ONLINE":
-                    self.tcpClientSocket.send(str(tcpThreads).encode())
+                    response = list(tcpThreads.keys())
+                    self.tcpClientSocket.send(str(response).encode())
             except OSError as oErr:
                 logging.error("OSError: {0}".format(oErr)) 
 
