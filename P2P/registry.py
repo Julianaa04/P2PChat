@@ -89,7 +89,7 @@ class ClientThread(threading.Thread):
                         # if password is correct, then peer's thread is added to threads list
                         # peer is added to db with its username, port number, and ip address
                         if retrievedPass == password:
-                            self.username = username
+                            self.username = message[1]
                             self.lock.acquire()
                             try:
                                 tcpThreads[self.username] = self
@@ -123,8 +123,8 @@ class ClientThread(threading.Thread):
                         db.user_logout(username)
                         self.lock.acquire()
                         try:
-                            if username in tcpThreads:
-                                del tcpThreads[username]
+                            if message[1] in tcpThreads:
+                                del tcpThreads[message[1]]
                         finally:
                             self.lock.release()
                         print(self.ip + ":" + str(self.port) + " is logged out")
@@ -263,9 +263,9 @@ while inputs:
             if message[0] == "HELLO":
                 # checks if the account that this hello message 
                 # is sent from is online
-                if (hashlib.sha256(message[1].encode()).hexdigest()) in tcpThreads:
+                if (message[1]) in tcpThreads:
                     # resets the timeout for that peer since the hello message is received
-                    tcpThreads[hashlib.sha256(message[1].encode()).hexdigest()].resetTimeout()
+                    tcpThreads[message[1]].resetTimeout()
                     print("Hello is received from " + message[1])
                     logging.info("Received from " + clientAddress[0] + ":" + str(clientAddress[1]) + " -> " + " ".join(message))
                     
