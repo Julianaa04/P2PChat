@@ -284,14 +284,14 @@ class peerMain:
         self.registryName = input(Fore.LIGHTWHITE_EX+"Enter IP address of registry: ")
         #self.registryName = 'localhost'
         # port number of the registry
-        self.registryPort = 15600
+        self.registryPort = 15699
         # tcp socket connection to registry
         self.tcpClientSocket = socket(AF_INET, SOCK_STREAM)
         self.tcpClientSocket.connect((self.registryName,self.registryPort))
         # initializes udp socket which is used to send hello messages
         self.udpClientSocket = socket(AF_INET, SOCK_DGRAM)
         # udp port of the registry
-        self.registryUDPPort = 15500
+        self.registryUDPPort = 15599
         # login info of the peer
         self.loginCredentials = (None, None)
         # online status of the peer
@@ -318,7 +318,7 @@ class peerMain:
 
                 user_input = input(Fore.LIGHTWHITE_EX + "Choose: ")
                 return user_input
-            if not self.isOnline :
+            if not self.isOnline:
                 choices = {
                     '1': {'text': 'Create account', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
                     '2': {'text': 'Login', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
