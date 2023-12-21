@@ -150,9 +150,18 @@ class PeerServer(threading.Thread):
             # handles the exceptions, and logs them
             except OSError as oErr:
                 logging.error("OSError: {0}".format(oErr))
+
             except ValueError as vErr:
                 logging.error("ValueError: {0}".format(vErr))
-            
+
+            except Exception as e:
+                logging.error(f"An unexpected error occurred: {e}")
+
+            except threading.ThreadError as te:
+                logging.error(f"Thread error: {te}")
+
+            except IndexError as ie:
+                logging.error(f"Index error: {ie}")
 
 # Client side of peer
 class PeerClient(threading.Thread):

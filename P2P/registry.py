@@ -162,8 +162,16 @@ class ClientThread(threading.Thread):
                     response = list(tcpThreads.keys())
                     self.tcpClientSocket.send(str(response).encode())
             except OSError as oErr:
-                logging.error("OSError: {0}".format(oErr)) 
+                logging.error("OSError: {0}".format(oErr))
 
+            except threading.ThreadError as te:
+                logging.error(f"Thread error: {te}")
+
+            except IndexError as ie:
+                logging.error(f"Index error: {ie}")
+
+            except Exception as e:
+                logging.error(f"An unexpected error occurred: {e}")
 
     # function for resettin the timeout for the udp timer thread
     def resetTimeout(self):
@@ -234,8 +242,18 @@ tcpThreads = {}
 #tcp and udp socket initializations
 tcpSocket = socket(AF_INET, SOCK_STREAM)
 udpSocket = socket(AF_INET, SOCK_DGRAM)
-tcpSocket.bind((host,port))
-udpSocket.bind((host,portUDP))
+
+try:
+    tcpSocket.bind((host,port))
+except OSError as oErr:
+    logging.error(f"Error binding TCP socket: {oErr}")
+
+try:
+    udpSocket.bind((host,portUDP))
+except OSError as oErr:
+    logging.error(f"Error binding UDP socket: {oErr}")
+
+
 tcpSocket.listen(5)
 
 # input sockets that are listened
@@ -250,26 +268,38 @@ while inputs:
     # monitors for the incoming connections
     readable, writable, exceptional = select.select(inputs, [], [])
     for s in readable:
-        # if the message received comes to the tcp socket
-        # the connection is accepted and a thread is created for it, and that thread is started
-        if s == tcpSocket:
-            tcpClientSocket, addr = tcpSocket.accept()
-            newThread = ClientThread(addr[0], addr[1], tcpClientSocket)
-            newThread.start()
-        # if the message received comes to the udp socket
-        elif s == udpSocket:
-            # received the incoming udp message and parses it
-            message, clientAddress = s.recvfrom(1024)
-            message = message.decode().split()
-            # checks if it is a hello message
-            if message[0] == "HELLO":
-                # checks if the account that this hello message 
-                # is sent from is online
-                if message[1] in tcpThreads:
-                    # resets the timeout for that peer since the hello message is received
-                    tcpThreads[message[1]].resetTimeout()
-                    print("Hello is received from " + message[1])
-                    logging.info("Received from " + clientAddress[0] + ":" + str(clientAddress[1]) + " -> " + " ".join(message))
-                    
+        try:
+            # if the message received comes to the tcp socket
+            # the connection is accepted and a thread is created for it, and that thread is started
+            if s == tcpSocket:
+                tcpClientSocket, addr = tcpSocket.accept()
+                newThread = ClientThread(addr[0], addr[1], tcpClientSocket)
+                newThread.start()
+            # if the message received comes to the udp socket
+            elif s == udpSocket:
+                # received the incoming udp message and parses it
+                message, clientAddress = s.recvfrom(1024)
+                message = message.decode().split()
+                # checks if it is a hello message
+                if message[0] == "HELLO":
+                    # checks if the account that this hello message
+                    # is sent from is online
+                    if message[1] in tcpThreads:
+                        # resets the timeout for that peer since the hello message is received
+                        tcpThreads[message[1]].resetTimeout()
+                        print("Hello is received from " + message[1])
+                        logging.info("Received from " + clientAddress[0] + ":" + str(clientAddress[1]) + " -> " + " ".join(message))
+        except OSError as se:
+            logging.error(f"Socket error: {se}")
+
+        except Exception as e:
+            logging.error(f"An unexpected error occurred: {e}")
+
+        except threading.ThreadError as te:
+            logging.error(f"Thread error: {te}")
+
+        except IndexError as ie:
+            logging.error(f"Index error: {ie}")
+
 # registry tcp socket is closed
 tcpSocket.close()
