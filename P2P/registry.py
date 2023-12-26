@@ -108,6 +108,12 @@ class ClientThread(threading.Thread):
                             self.udpServer = UDPServer(self.username, self.tcpClientSocket)
                             self.udpServer.start()
                             self.udpServer.timer.start()
+
+                            chatroom_name = message[4]
+                            # chatroom_thread = ClassroomChatThread(chatroom_name)
+                            # chatroom_thread.start()
+                            # # Add the user to the chatroom
+                            # chatroom_thread.join_chat(self.username)
                         # if password not matches and then login-wrong-password response is sent
                         else:
                             response = "login-wrong-password"
@@ -132,6 +138,10 @@ class ClientThread(threading.Thread):
                         print(self.ip + ":" + str(self.port) + " is logged out")
                         self.tcpClientSocket.close()
                         self.udpServer.timer.cancel()
+                        chatroom_name = message[4]
+                        # chatroom_thread = ClassroomChatThread(chatroom_name, self.tcpClientSocket, self.ip, self.port)
+                        # chatroom_thread.start()
+                        # chatroom_thread.join_chat(self.username)
                         break
                     else:
                         self.tcpClientSocket.close()
@@ -152,15 +162,33 @@ class ClientThread(threading.Thread):
                             response = "search-user-not-online"
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response) 
                             self.tcpClientSocket.send(response.encode())
-                    # enters if username does not exist 
+                    # enters if username does not exist
                     else:
                         response = "search-user-not-found"
-                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response) 
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
 
                 elif message[0] == "ONLINE":
                     response = list(tcpThreads.keys())
                     self.tcpClientSocket.send(str(response).encode())
+
+                # CHATROOM   #
+                elif message[0] == "CHATROOM":
+                    # Extract chatroom name from the message
+                    chatroom_name = message[1]
+
+                    # chatroom-not-exist is sent to peer if the chatroom name does not exist
+                    if not db.is_chatroom_exist(chatroom_name):
+                        db.addChatroom(chatroom_name)  # Add the chatroom
+                        response = "chatroom-success"
+                        logging.info(f"Send to {self.ip}:{str(self.port)} -> {response}")
+                        self.tcpClientSocket.send(response.encode())
+                    else:
+                        response = "chatroom-exist"
+                        print("From-> " + self.ip + ":" + str(self.port) + " " + response)
+                        logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+                        self.tcpClientSocket.send(response.encode())
+
             except OSError as oErr:
                 logging.error("OSError: {0}".format(oErr))
 
@@ -172,6 +200,9 @@ class ClientThread(threading.Thread):
 
             except Exception as e:
                 logging.error(f"An unexpected error occurred: {e}")
+
+            except Exception as e:
+                logging.error(f"An unexpected error occurred in ClassroomChatThread: {e}")
 
     # function for resettin the timeout for the udp timer thread
     def resetTimeout(self):
@@ -203,6 +234,77 @@ class UDPServer(threading.Thread):
         self.timer.cancel()
         self.timer = threading.Timer(3, self.waitHelloMessage)
         self.timer.start()
+
+# class ClassroomChatThread(threading.Thread):
+#     def __init__(self, chatroom_name, tcpClientSocket, ip, port):
+#         threading.Thread.__init__(self)
+#         self.chatroom_name = chatroom_name
+#         # List to store the users in the chatroom
+#         self.users = []
+#         self.lock = threading.Lock()
+#         self.tcpClientSocket = tcpClientSocket
+#         self.ip = ip  # Store the ip as a class attribute
+#         self.port = port  # Store the port as a class attribute
+#
+#     def run(self):
+#         while True:
+#             try:
+#                 # waits for incoming messages from peers
+#                 message = self.tcpClientSocket.recv(1024).decode().split()
+#                 logging.info("Received from " + self.ip + ":" + str(self.port) + " -> " + " ".join(message))
+#                 # message[1]=username, message[2]=password
+#                 # Hashing of username and password using SHA256 Hashing Method
+#                 username = hashlib.sha256(message[1].encode()).hexdigest()
+#
+#                 #   CHATROOM   #
+#                 if message[0] == "CHATROOM":
+#                     # Extract chatroom name from the message
+#                     chatroom_name = message[1]
+#
+#                     # chatroom-not-exist is sent to peer,
+#                     # if chatroom name does not exist
+#                     if not db.addChatroom(chatroom_name):
+#                         response = "chatroom-not-exist"
+#                         logging.info(f"Send to {self.ip}:{str(self.port)} -> {response}")
+#                         self.tcpClientSocket.send(response.encode())
+#
+#                     elif db.addChatroom(chatroom_name):
+#                         response = "chatroom-exist"
+#                         print("From-> " + self.ip + ":" + str(self.port) + " " + response)
+#                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
+#                         self.tcpClientSocket.send(response.encode())
+#
+#                     else:
+#                         response = "chatroom-success"
+#                         logging.info(f"Send to {self.ip}:{str(self.port)} -> {response}")
+#                         self.tcpClientSocket.send(response.encode())
+#
+#             except Exception as e:
+#                 logging.error(f"An unexpected error occurred in ClassroomChatThread: {e}")
+#
+#
+#     def join_chat(self, username):
+#         with self.lock:
+#             # Add user to the chatroom
+#             self.users.append(username)
+#             # Notify all users about the new user joining
+#             self.broadcast(f"{username} joined the chat.")
+#
+#     def leave_chat(self, username):
+#         with self.lock:
+#             # Remove user from the chatroom
+#             self.users.remove(username)
+#             # Notify all users about the user leaving
+#             self.broadcast(f"{username} left the chat.")
+#
+#     def broadcast(self, message):
+#         with self.lock:
+#             # Send the message to all users in the chatroom
+#             for user in self.users:
+#                 if user in tcpThreads:
+#                     # Assuming tcpThreads[user] is the instance of ClientThread for the user
+#                     tcpThreads[user].tcpClientSocket.send(message.encode())
+
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -238,6 +340,8 @@ onlinePeers = {}
 accounts = {}
 # tcpThreads list for online client's thread
 tcpThreads = {}
+#chatroom list
+chatrooms = {}
 
 #tcp and udp socket initializations
 tcpSocket = socket(AF_INET, SOCK_STREAM)
@@ -263,6 +367,10 @@ inputs = [tcpSocket, udpSocket]
 logging.basicConfig(filename="registry.log", level=logging.INFO)
 
 # as long as at least a socket exists to listen registry runs
+# Assuming ClassroomChatThread is defined in your code
+
+# Assuming ClassroomChatThread is defined in your code
+
 while inputs:
     print("Listening for incoming connections...")
     # monitors for the incoming connections
@@ -275,6 +383,13 @@ while inputs:
                 tcpClientSocket, addr = tcpSocket.accept()
                 newThread = ClientThread(addr[0], addr[1], tcpClientSocket)
                 newThread.start()
+
+                # Check if a chatroom name is received
+                # if newThread.chatroom_name:
+                #     # Create ClassroomChatThread outside the if block
+                #     chatroom_thread = ClassroomChatThread(newThread.chatroom_name, tcpClientSocket, addr[0], addr[1])
+                #     chatroom_thread.start()
+
             # if the message received comes to the udp socket
             elif s == udpSocket:
                 # received the incoming udp message and parses it
@@ -300,6 +415,11 @@ while inputs:
 
         except IndexError as ie:
             logging.error(f"Index error: {ie}")
+
+# registry tcp socket is closed
+tcpSocket.close()
+
+
 
 # registry tcp socket is closed
 tcpSocket.close()
