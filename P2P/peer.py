@@ -4,6 +4,7 @@
     ##  150114822 - Eren Ulaş
 '''
 
+import socket
 from socket import *
 import threading
 import time
@@ -11,6 +12,7 @@ import select
 import logging
 import colorama
 from colorama import Back, Fore, Style
+
 
 # Server side of peer
 class PeerServer(threading.Thread):
@@ -37,26 +39,27 @@ class PeerServer(threading.Thread):
         self.isOnline = True
         # keeps the username of the peer that this peer is chatting with
         self.chattingClientName = None
-    
+        self.chatroomName = None
+        self.isChatroomRequested = 0
 
     # main method of the peer server thread
     def run(self):
-        
-        print("Peer server started...")    
+
+        print("Peer server started...")
 
         # gets the ip address of this peer
         # first checks to get it for windows devices
         # if the device that runs this application is not windows
         # it checks to get it for macos devices
-        hostname=gethostname()
+        hostname = gethostname()
         try:
-            self.peerServerHostname=gethostbyname(hostname)
+            self.peerServerHostname = gethostbyname(hostname)
         except gaierror:
             import netifaces as ni
             self.peerServerHostname = ni.ifaddresses('en0')[ni.AF_INET][0]['addr']
 
         # ip address of this peer
-        #self.peerServerHostname = 'localhost'
+        # self.peerServerHostname = 'localhost'
         # socket initializations for the server of the peer
         self.tcpServerSocket.bind((self.peerServerHostname, self.peerServerPort))
         self.tcpServerSocket.listen(4)
@@ -69,9 +72,9 @@ class PeerServer(threading.Thread):
                 readable, writable, exceptional = select.select(inputs, [], [])
                 # If a server waits to be connected enters here
                 for s in readable:
-                    # if the socket that is receiving the connection is 
+                    # if the socket that is receiving the connection is
                     # the tcp socket of the peer's server, enters here
-                    if s==self.tcpServerSocket:
+                    if s == self.tcpServerSocket:
                         # accepts the connection, and adds its connection socket to the inputs list
                         # so that we can monitor that socket as well
                         connected, addr = s.accept()
@@ -79,12 +82,18 @@ class PeerServer(threading.Thread):
                         inputs.append(connected)
                         # if the user is not chatting, then the ip and the socket of
                         # this peer is assigned to server variables
-                        if self.isChatRequested == 0:     
+                        if self.isChatroomRequested == 1:
+                            messageReceived = s.recv(1024).decode()
+                            logging.info("Received from " + str(self.connectedPeerIP) + " -> " + str(messageReceived))
+                            print(self.chatroomName + " is connected from " + str(addr))
+                            self.connectedPeerSocket = connected
+                            self.connectedPeerIP = addr[0]
+                        elif self.isChatRequested == 0:
                             print(self.username + " is connected from " + str(addr))
                             self.connectedPeerSocket = connected
                             self.connectedPeerIP = addr[0]
-                    # if the socket that receives the data is the one that
-                    # is used to communicate with a connected peer, then enters here
+                            # if the socket that receives the data is the one that
+                            # is used to communicate with a connected peer, then enters here
                     else:
                         # message is received from connected peer
                         messageReceived = s.recv(1024).decode()
@@ -96,7 +105,7 @@ class PeerServer(threading.Thread):
                             # text for proper input choices is printed however OK or REJECT is taken as input in main process of the peer
                             # if the socket that we received the data belongs to the peer that we are chatting with,
                             # enters here
-                            if s==self.connectedPeerSocket:
+                            if s == self.connectedPeerSocket:
                                 # parses the message
                                 messageReceived = messageReceived.split()
                                 # gets the port of the peer that sends the chat request message
@@ -111,7 +120,7 @@ class PeerServer(threading.Thread):
                             # if the socket that we received the data does not belong to the peer that we are chatting with
                             # and if the user is already chatting with someone else(isChatRequested = 1), then enters here
                             elif s != self.connectedPeerSocket and self.isChatRequested == 1:
-                                # sends a busy message to the peer that sends a chat request when this peer is 
+                                # sends a busy message to the peer that sends a chat request when this peer is
                                 # already chatting with someone else
                                 message = "BUSY"
                                 s.send(message.encode())
@@ -124,9 +133,9 @@ class PeerServer(threading.Thread):
                         elif messageReceived == "REJECT":
                             self.isChatRequested = 0
                             inputs.remove(s)
-                        # if a message is received, and if this is not a quit message ':q' and 
+                        # if a message is received, and if this is not a quit message ':q' and
                         # if it is not an empty message, show this message to the user
-                        elif messageReceived[:2] != ":q" and len(messageReceived)!= 0:
+                        elif messageReceived[:2] != ":q" and len(messageReceived) != 0:
                             print(self.chattingClientName + ": " + messageReceived)
                         # if the message received is a quit message ':q',
                         # makes ischatrequested 1 to receive new incoming request messages
@@ -163,6 +172,7 @@ class PeerServer(threading.Thread):
             except IndexError as ie:
                 logging.error(f"Index error: {ie}")
 
+
 # Client side of peer
 class PeerClient(threading.Thread):
     # variable initializations for the client side of the peer
@@ -185,16 +195,15 @@ class PeerClient(threading.Thread):
         # keeps if this client is ending the chat or not
         self.isEndingChat = False
 
-
     # main method of the peer client thread
     def run(self):
         print("Peer client started...")
         # connects to the server of other peer
         self.tcpClientSocket.connect((self.ipToConnect, self.portToConnect))
         # if the server of this peer is not connected by someone else and if this is the requester side peer client then enters here
-        if self.peerServer.isChatRequested == 0 and self.responseReceived==None:
+        if self.peerServer.isChatRequested == 0 and self.responseReceived == None:
             # composes a request message and this is sent to server and then this waits a response message from the server this client connects
-            requestMessage = "CHAT-REQUEST " + str(self.peerServer.peerServerPort)+ " " + self.username
+            requestMessage = "CHAT-REQUEST " + str(self.peerServer.peerServerPort) + " " + self.username
             # logs the chat request sent to other peer
             logging.info("Send to " + self.ipToConnect + ":" + str(self.portToConnect) + " -> " + requestMessage)
             # sends the chat request
@@ -203,7 +212,8 @@ class PeerClient(threading.Thread):
             # received a response from the peer which the request message is sent to
             self.responseReceived = self.tcpClientSocket.recv(1024).decode()
             # logs the received message
-            logging.info("Received from " + self.ipToConnect + ":" + str(self.portToConnect) + " -> " + self.responseReceived)
+            logging.info(
+                "Received from " + self.ipToConnect + ":" + str(self.portToConnect) + " -> " + self.responseReceived)
             print("Response is " + self.responseReceived)
             # parses the response for the chat request
             self.responseReceived = self.responseReceived.split()
@@ -240,7 +250,7 @@ class PeerClient(threading.Thread):
                     self.responseReceived = None
                     self.tcpClientSocket.close()
             # if the request is rejected, then changes the server status, sends a reject message to the connected peer's server
-            # logs the message and then the socket is closed       
+            # logs the message and then the socket is closed
             elif self.responseReceived[0] == "REJECT":
                 self.peerServer.isChatRequested = 0
                 print("client of requester is closing...")
@@ -281,7 +291,7 @@ class PeerClient(threading.Thread):
                     logging.info("Send to " + self.ipToConnect + ":" + str(self.portToConnect) + " -> :q")
                 self.responseReceived = None
                 self.tcpClientSocket.close()
-                
+
 
 # main process of the peer
 class peerMain:
@@ -290,17 +300,17 @@ class peerMain:
     def __init__(self):
 
         # ip address of the registry
-        self.registryName = input(Fore.LIGHTWHITE_EX+"Enter IP address of registry: ")
-        #self.registryName = 'localhost'
+        self.registryName = gethostname()
+        # self.registryName = 'localhost'
         # port number of the registry
-        self.registryPort = 15699
+        self.registryPort = 15713
         # tcp socket connection to registry
         self.tcpClientSocket = socket(AF_INET, SOCK_STREAM)
-        self.tcpClientSocket.connect((self.registryName,self.registryPort))
+        self.tcpClientSocket.connect((self.registryName, self.registryPort))
         # initializes udp socket which is used to send hello messages
         self.udpClientSocket = socket(AF_INET, SOCK_DGRAM)
         # udp port of the registry
-        self.registryUDPPort = 15599
+        self.registryUDPPort = 15713
         # login info of the peer
         self.loginCredentials = (None, None)
         # online status of the peer
@@ -313,7 +323,7 @@ class peerMain:
         self.peerClient = None
         # timer initialization
         self.timer = None
-        
+
         choice = "0"
         # log file initialization
         logging.basicConfig(filename="peer.log", level=logging.INFO)
@@ -328,34 +338,44 @@ class peerMain:
 
                     user_input = input(Fore.LIGHTWHITE_EX + "Choose: ")
                     return user_input
+
                 if not self.isOnline:
                     choices = {
-                        '1': {'text': 'Create account', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
+                        '1': {'text': 'Create account', 'number_color': Fore.LIGHTCYAN_EX,
+                              'text_color': Fore.LIGHTWHITE_EX},
                         '2': {'text': 'Login', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
                         '3': {'text': 'Exit', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
                     }
                 else:
                     choices = {
                         '1': {'text': 'Search', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
-                        '2': {'text': 'Start a chat', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
+                        '2': {'text': 'Start a chat', 'number_color': Fore.LIGHTCYAN_EX,
+                              'text_color': Fore.LIGHTWHITE_EX},
                         '3': {'text': 'Exit', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
                         '4': {'text': 'Logout', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
-                        '5': {'text': 'Get Online Peers', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
-                        '6': {'text': 'chatroom', 'number_color': Fore.LIGHTCYAN_EX,'text_color': Fore.LIGHTWHITE_EX},
+                        '5': {'text': 'Get Online Peers', 'number_color': Fore.LIGHTCYAN_EX,
+                              'text_color': Fore.LIGHTWHITE_EX},
+                        '6': {'text': 'Create chatroom', 'number_color': Fore.LIGHTCYAN_EX, 'text_color': Fore.LIGHTWHITE_EX},
+                        '7': {'text': 'Join chatroom', 'number_color': Fore.LIGHTCYAN_EX,
+                              'text_color': Fore.LIGHTWHITE_EX},
+                        '8':{'text': 'List of users in ChatRoom', 'number_color': Fore.LIGHTCYAN_EX,
+                              'text_color': Fore.LIGHTWHITE_EX},
+                        '9': {'text': 'Leave ChatRoom', 'number_color': Fore.LIGHTCYAN_EX,
+                              'text_color': Fore.LIGHTWHITE_EX}
                     }
                 choice = get_colored_input(choices)
                 # if choice is 1, creates an account with the username
                 # and password entered by the user
-                if choice=="1" and not self.isOnline:
-                    username = input(Fore.LIGHTMAGENTA_EX +"username: ")
-                    password = input(Fore.LIGHTMAGENTA_EX +"password: ")
+                if choice == "1" and not self.isOnline:
+                    username = input(Fore.LIGHTMAGENTA_EX + "username: ")
+                    password = input(Fore.LIGHTMAGENTA_EX + "password: ")
 
                     self.createAccount(username, password)
                 # if choice is 2 and user is not logged in, asks for the username
                 # and the password to login
-                elif choice=="2" and not self.isOnline:
-                    username = input(Fore.LIGHTMAGENTA_EX +"username: ")
-                    password = input(Fore.LIGHTMAGENTA_EX +"password: ")
+                elif choice == "2" and not self.isOnline:
+                    username = input(Fore.LIGHTMAGENTA_EX + "username: ")
+                    password = input(Fore.LIGHTMAGENTA_EX + "password: ")
                     # asks for the port number for server's tcp socket
                     sock = socket()
                     sock.bind(('', 0))
@@ -363,7 +383,7 @@ class peerMain:
 
                     status = self.login(username, password, peerServerPort)
                     # is user logs in successfully, peer variables are set
-                    if status==1:
+                    if status == 1:
                         self.isOnline = True
                         self.loginCredentials = (username, password)
                         self.peerServerPort = peerServerPort
@@ -380,32 +400,31 @@ class peerMain:
                     searchStatus = self.searchUser(username)
                     # if user is found its ip address is shown to user
                     if searchStatus != None and searchStatus != 0:
-                       print("IP address of " + username + " is " + searchStatus)
+                        print("IP address of " + username + " is " + searchStatus)
 
                     # if choice is 2 and user is online, then user is asked
                     # to enter the username of the user that is wanted to be chatted
                 elif choice == "2" and self.isOnline:
                     username = input(Fore.LIGHTMAGENTA_EX + "Enter the username of user to start chat: ")
                     searchStatus = self.searchUser(username)
-                        # if searched user is found, then its ip address and port number is retrieved
-                        # and a client thread is created
-                        # main process waits for the client thread to finish its chat
+                    # if searched user is found, then its ip address and port number is retrieved
+                    # and a client thread is created
+                    # main process waits for the client thread to finish its chat
                     if searchStatus != None and searchStatus != 0:
                         searchStatus = searchStatus.split(":")
                         self.peerClient = PeerClient(searchStatus[0], int(searchStatus[1]), self.loginCredentials[0],
-                                                         self.peerServer, None)
+                                                     self.peerServer, None)
                         self.peerClient.start()
                         self.peerClient.join()
 
-                    #if choice is 6 and user is online, the user requests the list of online peers right now
+                    # if choice is 6 and user is online, the user requests the list of online peers right now
                     # The user sends the request to the server and the server shall respond with a message containing the users
                 elif choice == "5" and self.isOnline:
                     msg = self.getOnlinePeers()
                     print(msg + '\n\n')
 
-
-                        # if choice is 4 and user is logged in, then user is logged out
-                        # # and peer variables are set, and server and client sockets are closed
+                    # if choice is 4 and user is logged in, then user is logged out
+                    # # and peer variables are set, and server and client sockets are closed
                 elif choice == "4" and self.isOnline:
                     self.logout(1)
                     self.isOnline = False
@@ -417,14 +436,54 @@ class peerMain:
                     print(Fore.LIGHTGREEN_EX + "Logged out successfully")
                     main = peerMain()
 
-                        #if choice is 5 ,"Exit" process is done, peer will not be logged in & program is terminated
+                    # if choice is 5 ,"Exit" process is done, peer will not be logged in & program is terminated
 
                 # if choice is 6, user is online, and the user is not already in a chatroom
                 elif choice == "6" and self.isOnline:
                     chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: ")
-                    self.createChatroom(chatroomName)
+                    self.createChatroom(chatroomName, username)
 
-                elif choice=="3":
+                elif choice =="7" and self.isOnline:
+                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: ")
+                    self.joinchatRoom(chatroomName, username)
+                    self.peerServer.isChatroomRequested = 1
+                    while True:
+                        message = input(f"{username}: ")
+                        Users = self.list_Chatrooms(chatroomName)
+                        print("Sending to: " + str(Users))
+                        for user in Users:
+                            result = self.searchUser(user)
+                            # Define the server's IP address and port
+                            server_ip = result[0]  # Replace with your server's IP address
+                            server_port = result[1]  # Replace with your server's port
+                            # Create a socket object
+                            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            # Connect to the server
+                            client_socket.connect((server_ip, server_port))
+                            # Send the message
+                            client_socket.sendall(message.encode())
+                            # Close the socket
+                            client_socket.close()
+                        if message == ':q':
+                            # self.peerServer.isChatroom = 0
+                            self.LeaveRoom(chatroomName, username)
+                            break
+
+                elif choice == "8" and self.isOnline:
+                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: ")
+                    users = self.list_Chatrooms(chatroomName)
+                    for user in users:
+                        print(user)
+                elif choice == "9" and self.isOnline:
+                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the chatroom you want to leave: ")
+                    # searchStatus = self.SearchchatRoom(chatroomName)
+                    # if searchStatus != None and searchStatus != 0:
+                    #     users = self.list_Chatrooms(chatroomName)
+                    #     for user in users:
+                    self.LeaveRoom(chatroomName, username)
+                    print(Fore.LIGHTGREEN_EX + username + " left chatroom")
+
+                elif choice == "3":
                     self.logout(2)
 
 
@@ -437,7 +496,8 @@ class peerMain:
                     okMessage = "OK " + self.loginCredentials[0]
                     logging.info("Send to " + self.peerServer.connectedPeerIP + " -> " + okMessage)
                     self.peerServer.connectedPeerSocket.send(okMessage.encode())
-                    self.peerClient = PeerClient(self.peerServer.connectedPeerIP, self.peerServer.connectedPeerPort , self.loginCredentials[0], self.peerServer, "OK")
+                    self.peerClient = PeerClient(self.peerServer.connectedPeerIP, self.peerServer.connectedPeerPort,
+                                                 self.loginCredentials[0], self.peerServer, "OK")
                     self.peerClient.start()
                     self.peerClient.join()
                 # if user rejects the chat request then reject message is sent to the requester side
@@ -478,12 +538,14 @@ class peerMain:
         response = self.tcpClientSocket.recv(1024).decode()
         logging.info("Received from " + self.registryName + " -> " + response)
         if response == "join-success":
-            print(Fore.LIGHTGREEN_EX+"Account created...")
+            print(Fore.LIGHTGREEN_EX + "Account created...")
         elif response == "join-exist":
-            print(Fore.LIGHTYELLOW_EX+"choose another username or login...")
+            print(Fore.LIGHTYELLOW_EX + "choose another username or login...")
 
-    def createChatroom(self, chatroomName):
-        message = "CHATROOM " + chatroomName
+
+#julianaaaa
+    def createChatroom(self, chatroomName, RoomCreator):  # update hereeee -> add hostname
+        message = "CHATROOM " + chatroomName + " " + RoomCreator
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
         self.tcpClientSocket.send(message.encode())
         response = self.tcpClientSocket.recv(1024).decode()
@@ -492,6 +554,50 @@ class peerMain:
             print(Fore.LIGHTGREEN_EX + "Chatroom is created...")
         elif response == "chatroom-exist":
             print(Fore.LIGHTYELLOW_EX + "Chatroom name already existed, choose another name...")
+
+
+    def joinchatRoom(self, chatroomName, username):
+        message = "JOINCHATROOM " + chatroomName + " " + username
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode()
+        logging.info("Received from " + self.registryName + " -> " + response)
+        if response == "join-success":
+            print(f"joined {chatroomName} successfully")
+
+        elif response == "join-exist":
+            print("you are already in chat room")
+
+
+    def SearchchatRoom(self, chatroomName):
+        message = "SearchROOM " + chatroomName
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode().split()
+        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        if response[0] == "search-success":
+            print(chatroomName + Fore.LIGHTGREEN_EX + " is found successfully...")
+            return response[1]
+
+        elif response[0] == "chatroom-not-found":
+            print(chatroomName + Fore.LIGHTRED_EX + " is not found")
+            return None
+
+    def list_Chatrooms(self, chatroomName):
+        message = "get_users " + chatroomName
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode().split(":")
+        logging.info("Received from " + self.registryName + " -> " + "".join(response))
+        return response[1:]
+
+    def LeaveRoom(self, chatroomName, username):
+        message = "LeaveRoom " + chatroomName+ " " + username
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode()
+        logging.info("Received from " + self.registryName + " -> " + response)
+        print(response)
 
 
     # login function
@@ -504,18 +610,18 @@ class peerMain:
         response = self.tcpClientSocket.recv(1024).decode()
         logging.info("Received from " + self.registryName + " -> " + response)
         if response == "login-success":
-            print(Fore.LIGHTGREEN_EX+"Logged in successfully...")
+            print(Fore.LIGHTGREEN_EX + "Logged in successfully...")
             return 1
         elif response == "login-account-not-exist":
-            print(Fore.LIGHTRED_EX+"Account does not exist...")
+            print(Fore.LIGHTRED_EX + "Account does not exist...")
             return 0
         elif response == "login-online":
-            print(Fore.LIGHTYELLOW_EX+"Account is already online...")
+            print(Fore.LIGHTYELLOW_EX + "Account is already online...")
             return 2
         elif response == "login-wrong-password":
-            print(Fore.LIGHTRED_EX+"Wrong username or password...")
+            print(Fore.LIGHTRED_EX + "Wrong username or password...")
             return 3
-    
+
     # logout function
     def logout(self, option):
         # a logout message is composed and sent to registry
@@ -527,7 +633,6 @@ class peerMain:
             message = "LOGOUT" + ' logout'
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
         self.tcpClientSocket.send(message.encode())
-        
 
     # function for searching an online user
     def searchUser(self, username):
@@ -540,15 +645,15 @@ class peerMain:
         response = self.tcpClientSocket.recv(1024).decode().split()
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         if response[0] == "search-success":
-            print(username + Fore.LIGHTGREEN_EX+" is found successfully...")
+            print(username + Fore.LIGHTGREEN_EX + " is found successfully...")
             return response[1]
         elif response[0] == "search-user-not-online":
-            print(username + Fore.LIGHTYELLOW_EX+" is not online...")
+            print(username + Fore.LIGHTYELLOW_EX + " is not online...")
             return 0
         elif response[0] == "search-user-not-found":
-            print(username +Fore.LIGHTRED_EX+ " is not found")
+            print(username + Fore.LIGHTRED_EX + " is not found")
             return None
-        
+
     def getOnlinePeers(self):
         message = "ONLINE" + ' online'
         self.tcpClientSocket.send(message.encode())
@@ -563,7 +668,6 @@ class peerMain:
         self.udpClientSocket.sendto(message.encode(), (self.registryName, self.registryUDPPort))
         self.timer = threading.Timer(1, self.sendHelloMessage)
         self.timer.start()
-
 
 
 # peer is started
