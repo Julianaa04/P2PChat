@@ -4,7 +4,6 @@
     ##  150114822 - Eren Ulaş
 '''
 
-import socket
 from socket import *
 import threading
 import time
@@ -452,14 +451,17 @@ class peerMain:
                         Users = self.list_Chatrooms(chatroomName)
                         print("Sending to: " + str(Users))
                         for user in Users:
+                            # Don't send the mees
+                            if user == username:
+                                continue
                             result = self.searchUser(user)
                             # Define the server's IP address and port
                             server_ip = result[0]  # Replace with your server's IP address
                             server_port = result[1]  # Replace with your server's port
                             # Create a socket object
-                            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            client_socket = socket(AF_INET, SOCK_STREAM)
                             # Connect to the server
-                            client_socket.connect((server_ip, server_port))
+                            client_socket.connect((server_ip, int(server_port)))
                             # Send the message
                             client_socket.sendall(message.encode())
                             # Close the socket
