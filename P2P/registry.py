@@ -228,7 +228,8 @@ class ClientThread(threading.Thread):
                         self.tcpClientSocket.send(response.encode())
 
                     else:
-                        response = "join-exist"
+
+                        response = "Roomnotfound"
                         print("\033[35m")
                         print("From-> " + self.ip + ":" + str(self.port) + " " + response)
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)

@@ -81,13 +81,8 @@ class PeerServer(threading.Thread):
                         inputs.append(connected)
                         # if the user is not chatting, then the ip and the socket of
                         # this peer is assigned to server variables
-                        if self.isChatroomRequested == 1:
-                            messageReceived = s.recv(1024).decode()
-                            logging.info("Received from " + str(self.connectedPeerIP) + " -> " + str(messageReceived))
-                            print(self.chatroomName + " is connected from " + str(addr))
-                            self.connectedPeerSocket = connected
-                            self.connectedPeerIP = addr[0]
-                        elif self.isChatRequested == 0:
+
+                        if self.isChatRequested == 0:
                             print(self.username + " is connected from " + str(addr))
                             self.connectedPeerSocket = connected
                             self.connectedPeerIP = addr[0]
@@ -96,11 +91,22 @@ class PeerServer(threading.Thread):
                     else:
                         # message is received from connected peer
                         messageReceived = s.recv(1024).decode()
+                        if self.isChatroomRequested == 1 and messageReceived !="":
+
+                                print(messageReceived)
+                                logging.info("Received from " + str(self.connectedPeerIP) + " -> " + str(messageReceived))
+                                print(self.chatroomName + " is connected from " + str(addr))
+                                self.connectedPeerSocket = connected
+                                self.connectedPeerIP = addr[0]
+                                break
+
+
+                        #messageReceived = s.recv(1024).decode()
                         # logs the received message
-                        logging.info("Received from " + str(self.connectedPeerIP) + " -> " + str(messageReceived))
+                        #logging.info("Received from " + str(self.connectedPeerIP) + " -> " + str(messageReceived))
                         # if message is a request message it means that this is the receiver side peer server
                         # so evaluate the chat request
-                        if len(messageReceived) > 11 and messageReceived[:12] == "CHAT-REQUEST":
+                        elif len(messageReceived) > 11 and messageReceived[:12] == "CHAT-REQUEST":
                             # text for proper input choices is printed however OK or REJECT is taken as input in main process of the peer
                             # if the socket that we received the data belongs to the peer that we are chatting with,
                             # enters here
@@ -149,7 +155,7 @@ class PeerServer(threading.Thread):
                                 print("Press enter to quit the chat: ")
                         # if the message is an empty one, then it means that the
                         # connected user suddenly ended the chat(an error occurred)
-                        elif len(messageReceived) == 0:
+                        elif len(messageReceived) == 0 and self.isChatroomRequested !=1:
                             self.isChatRequested = 0
                             inputs.clear()
                             inputs.append(self.tcpServerSocket)
@@ -455,15 +461,16 @@ class peerMain:
                             if user == username:
                                 continue
                             result = self.searchUser(user)
+                            ip, port = result.split(':')
                             # Define the server's IP address and port
-                            server_ip = result[0]  # Replace with your server's IP address
-                            server_port = result[1]  # Replace with your server's port
+                            server_ip = ip  # Replace with your server's IP address
+                            server_port = int(port)  # Replace with your server's port
                             # Create a socket object
                             client_socket = socket(AF_INET, SOCK_STREAM)
                             # Connect to the server
                             client_socket.connect((server_ip, int(server_port)))
                             # Send the message
-                            client_socket.sendall(message.encode())
+                            client_socket.sendall((f"{username}: "+ message).encode())
                             # Close the socket
                             client_socket.close()
                         if message == ':q':
@@ -570,6 +577,12 @@ class peerMain:
         elif response == "join-exist":
             print("you are already in chat room")
 
+        elif response == "Roomnotfound":
+            print("Room not found")
+            #code to return back to the menu
+            print("logging out")
+            self.logout(1)
+            peerMain()
 
     def SearchchatRoom(self, chatroomName):
         message = "SearchROOM " + chatroomName

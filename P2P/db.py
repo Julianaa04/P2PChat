@@ -45,12 +45,13 @@ class DB:
 
 
     def JoinChatRoom(self, chatroomName, username):  # add members to chatroom and update if new peer joined
-        self.db.chatrooms.update_one(
-            {"chatroomName": chatroomName}, {"$push": {"peers": username}}
-        )
-        self.db.accounts.update_one(
-            {"username": username}, {"$push": {"ChatRooms": chatroomName}}
-        )
+        if not self.FindUserinChatroom(chatroomName,username):
+            self.db.chatrooms.update_one(
+                {"chatroomName": chatroomName}, {"$push": {"peers": username}}
+            )
+            self.db.accounts.update_one(
+                {"username": username}, {"$push": {"ChatRooms": chatroomName}}
+            )
 
     #add members to chatroom and update query if new peer is joined
     #
