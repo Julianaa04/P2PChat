@@ -42,8 +42,6 @@ class DB:
             )
             self.db.chatrooms.insert_one(chatroom)
 
-
-
     def JoinChatRoom(self, chatroomName, username):  # add members to chatroom and update if new peer joined
         if not self.FindUserinChatroom(chatroomName,username):
             self.db.chatrooms.update_one(
@@ -70,7 +68,13 @@ class DB:
             # Return the list of users
             return ChatRoom['peers']
 
+    def userDetails(self, chatroomName,roomCreator):
+        ChatRoom = self.db.chatrooms.find_one({"chatroomName": chatroomName})
+        if ChatRoom:
+            peers = ChatRoom.get("RoomCreator", [])
 
+            if roomCreator in peers:
+                return roomCreator  # Return the room creator if found
 
 
 
@@ -113,17 +117,34 @@ class DB:
         res = self.db.online_peers.find_one({"username": username})
         return res["ip"], res["port"]
 
-    def leave_Chatroom(self,chatroom, username):
-        # chatroom_exists = self.db.chatrooms.find_one({'chatroom': chatroom})
-        # if username in chatroom['username']:
-        #     index = chatroom_exists['username'].index(username)
-        #     chatroom_exists['username'].pop(index)
-        #     self.db.chatrooms.update_one({'chatroom': chatroom}, {'$set': chatroom_exists})
+    def leave_Chatroom(self, chatroom, username):
+        chatroom_exists = self.db.chatrooms.find_one({'chatroomName': chatroom})
+
+        updated_peers = [
+            user
+            for user in chatroom_exists.get('peers', [])
+            if user != username
+        ]
+
         self.db.chatrooms.update_one(
             {"chatroomName": chatroom},
-            {'$pull': {'peers': {'username': username}}}
+            {'$set': {'peers': updated_peers}}
         )
+        #print(f"User {username} removed from chatroom {chatroom} successfully.")
 
+    def delete_chatroom(self, chatroom, RoomCreator):
+        # Check if the chatroom exists
+        if self.is_chatroom_exist(chatroom):
+            # Check if the requesting user is the creator of the chatroom
+            chatroom_data = self.db.chatrooms.find_one({"chatroomName": chatroom})
+            if chatroom_data and chatroom_data["RoomCreator"] == RoomCreator:
+                # Delete the chatroom
+                self.db.chatrooms.delete_one({"chatroomName": chatroom})
+                print("Chatroom deleted successfully")
+            else:
+                print("You are not the creator of the chatroom. Deletion failed.")
+        else:
+            print("Chatroom does not exist. Deletion failed.")
 
 # def Register_room(self, room_name, password, Admin):
 #     Chat_room = {
