@@ -84,7 +84,7 @@ class PeerServer(threading.Thread):
                         # this peer is assigned to server variables
 
                         if self.isChatRequested == 0:
-                            print(self.username + " is connected from " + str(addr))
+                            # print(self.username + " is connected from " + str(addr))
                             self.connectedPeerSocket = connected
                             self.connectedPeerIP = addr[0]
                             # if the socket that receives the data is the one that
@@ -431,7 +431,7 @@ class peerMain:
                     # if choice is 1 and user is online, then user is asked
                     # for a username that is wanted to be searched
                 elif choice == "1" and self.isOnline and not sub_menu_active:
-                    username = input(Fore.LIGHTMAGENTA_EX + "Username to be searched: ")
+                    username = input(Fore.LIGHTMAGENTA_EX + "Username to be searched: " + Fore.LIGHTWHITE_EX)
                     searchStatus = self.searchUser(username)
                     # if user is found its ip address is shown to user
                     if searchStatus != None and searchStatus != 0:
@@ -440,7 +440,7 @@ class peerMain:
                     # if choice is 2 and user is online, then user is asked
                     # to enter the username of the user that is wanted to be chatted
                 elif choice == "2" and self.isOnline and not sub_menu_active:
-                    username = input(Fore.LIGHTMAGENTA_EX + "Enter the username of user to start chat: ")
+                    username = input(Fore.LIGHTMAGENTA_EX + "Enter the username of user to start chat: " + Fore.LIGHTWHITE_EX)
                     searchStatus = self.searchUser(username)
                     # if searched user is found, then its ip address and port number is retrieved
                     # and a client thread is created
@@ -475,11 +475,11 @@ class peerMain:
 
                 # if choice is 6, user is online, and the user is not already in a chatroom
                 elif choice == "1" and self.isOnline and sub_menu_active:
-                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: ")
+                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: " + Fore.LIGHTWHITE_EX)
                     self.createChatroom(chatroomName, username)
 
                 elif choice =="2" and self.isOnline and sub_menu_active:
-                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: ")
+                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: " + Fore.LIGHTWHITE_EX)
                     self.joinchatRoom(chatroomName, username)
                     self.peerServer.isChatroomRequested = 1
                     while True:
@@ -512,7 +512,7 @@ class peerMain:
 
 
                 elif choice == "4" and self.isOnline and sub_menu_active:
-                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: ")
+                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: " + Fore.LIGHTWHITE_EX)
                     users = self.list_Chatrooms(chatroomName)
                     for user in users:
                         print(user)
@@ -524,7 +524,7 @@ class peerMain:
                 #     print(Fore.LIGHTGREEN_EX + username + " left chatroom")
 
                 elif choice == "5" and self.isOnline and sub_menu_active:
-                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: ")
+                    chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: " + Fore.LIGHTWHITE_EX)
                     self.deleteChatRoom(chatroomName, username)
 
                 elif choice == "3":
@@ -709,10 +709,10 @@ class peerMain:
         response = self.tcpClientSocket.recv(1024).decode().split()
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         if response[0] == "search-success":
-            print(Fore.LIGHTGREEN_EX + username + " is found successfully...")
+            print(Fore.LIGHTGREEN_EX + username + " is found successfully..." + Fore.LIGHTWHITE_EX)
             return response[1]
         elif response[0] == "search-user-not-online":
-            print(Fore.LIGHTYELLOW_EX + username + " is not online...")
+            print(Fore.LIGHTYELLOW_EX + username + " is not online..."  + Fore.LIGHTWHITE_EX)
             return 0
         elif response[0] == "search-user-not-found":
             print(Fore.LIGHTRED_EX + username + " is not found")
