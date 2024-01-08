@@ -512,12 +512,6 @@ class peerMain:
                         for user in users:
                             print(user)
 
-                    # elif choice == "5" and self.isOnline and sub_menu_active:
-                    #     chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the chatroom you want to leave: ")
-                    #
-                    #     self.LeaveRoom(chatroomName, username)
-                    #     print(Fore.LIGHTGREEN_EX + username + " left chatroom")
-
                     elif choice == "5" and self.isOnline and sub_menu_active:
                         chatroomName = input(Fore.LIGHTMAGENTA_EX + "Enter the name of the chatroom: " + Fore.LIGHTWHITE_EX)
                         self.deleteChatRoom(chatroomName, username)
@@ -646,28 +640,7 @@ class peerMain:
         self.tcpClientSocket.send(message.encode())
         response = self.tcpClientSocket.recv(1024).decode()
         logging.info("Received from " + self.registryName + " -> " + response)
-        #print(response)
         return response
-        # if response == "delete room successfully":
-        #     print(response)
-
-        # elif response == "User is not the creator of the chatroom":
-        #     return response
-
-        # elif response == "Chatroom does not exist":
-        #     return response
-
-        # def createChatroom(self, chatroomName, RoomCreator):  # update hereeee -> add hostname
-        #     message = "CHATROOM " + chatroomName + " " + RoomCreator
-        #     logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        #     self.tcpClientSocket.send(message.encode())
-        #     response = self.tcpClientSocket.recv(1024).decode()
-        #     logging.info("Received from " + self.registryName + " -> " + response)
-        #     if response == "chatroom-success":
-        #         print(Fore.LIGHTGREEN_EX + "Chatroom is created...")
-        #     elif response == "chatroom-exist":
-        #         print(Fore.LIGHTYELLOW_EX + "Chatroom name already existed, choose another name...")
-
 
     # login function
     def login(self, username, password, peerServerPort):

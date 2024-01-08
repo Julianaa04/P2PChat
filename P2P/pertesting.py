@@ -17,6 +17,21 @@ def generate_username():
     return username
 
 class testPerformanceThread(threading.Thread):
+    """
+    A class representing a performance testing thread.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Attributes:
+        user_id (int): The ID of the user.
+        peer (peerMain): An instance of the peerMain class.
+        logger (logging.Logger): The logger object for logging performance information.
+
+    Methods:
+        setup_logger: Sets up the logger object.
+        run: Runs the performance testing for creating and joining a chatroom.
+    """
     def __init__(self, user_id):
         self.user_id = user_id
         threading.Thread.__init__(self)
@@ -25,11 +40,20 @@ class testPerformanceThread(threading.Thread):
         self.logger = new_logger
 
     def setup_logger(self):
+        """
+        Sets up the logger object.
+
+        Returns:
+            logging.Logger: The logger object.
+        """
         logger = logging.getLogger(f"user_{self.user_id}")
         logger.setLevel(logging.INFO)
         return logger
 
     def run(self):
+        """
+        Runs the performance testing for creating and joining a chatroom.
+        """
         global totaltimetojoin
         global totaltimetocreate
         username = generate_username()
@@ -64,7 +88,8 @@ def main():
 
     for thread in threads:
         thread.join()
-        
+    print('============================================================')
+    print('Results of performance testing:')
     print("Avg time to join chatroom: ", totaltimetojoin / num_threads)
     print("Avg time to create a chatroom: ", totaltimetocreate / num_threads)
         

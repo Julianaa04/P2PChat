@@ -137,9 +137,6 @@ class ClientThread(threading.Thread):
                         self.tcpClientSocket.close()
                         self.udpServer.timer.cancel()
                         chatroom_name = message[4]
-                        # chatroom_thread = ClassroomChatThread(chatroom_name, self.tcpClientSocket, self.ip, self.port)
-                        # chatroom_thread.start()
-                        # chatroom_thread.join_chat(self.username)
                         break
                     else:
                         self.tcpClientSocket.close()
@@ -189,23 +186,6 @@ class ClientThread(threading.Thread):
                         print("From-> " + self.ip + ":" + str(self.port) + " " + response)
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
-
-                        # if message[0] == "CREATE":
-                    #                 # join-exist is sent to peer,
-                    #                 # if an account with this username already exists
-                    #                 if db.does_room_exist(message[1]):
-                    #                     response = "join-exist"
-                    #                     print("From-> " + self.ip + ":" + str(self.port) + " " + response)
-                    #                     logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
-                    #                     self.tcpClientSocket.send(response.encode())
-                    #                 # join-success is sent to peer,
-                    #                 # if an account with this username is not exist, and the account is created
-                    #                 else:
-                    #                     db.Register_room(message[1], message[2], message[3])
-                    #                     response = "join-success"
-                    #                     logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
-                    #                     self.tcpClientSocket.send(response.encode())
-
 
                 # if user is already in the room must be added
                 elif message[0] == "JOINCHATROOM":
