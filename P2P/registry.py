@@ -174,12 +174,12 @@ class ClientThread(threading.Thread):
                 elif message[0] == "CHATROOM":
                     # Extract chatroom name from the message
                     chatroom_name = message[1]
-                    RoomCreator=message[2]
+                    RoomCreator = message[2]
                     print(f"chatroom name = {chatroom_name} and RoomCreator = {RoomCreator}")
                     # chatroom-not-exist is sent to peer if the chatroom name does not exist
                     if not db.is_chatroom_exist(chatroom_name):
 
-                        db.addChatroom(chatroom_name,RoomCreator)  # Add the chatroom
+                        db.addChatroom(chatroom_name, RoomCreator)  # Add the chatroom
                         response = "chatroom-success"
                         logging.info(f"Send to {self.ip}:{str(self.port)} -> {response}")
                         self.tcpClientSocket.send(response.encode())
@@ -189,7 +189,6 @@ class ClientThread(threading.Thread):
                         print("From-> " + self.ip + ":" + str(self.port) + " " + response)
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response)
                         self.tcpClientSocket.send(response.encode())
-
 
                         # if message[0] == "CREATE":
                     #                 # join-exist is sent to peer,
@@ -208,7 +207,7 @@ class ClientThread(threading.Thread):
                     #                     self.tcpClientSocket.send(response.encode())
 
 
-             #if user is already in the room must be added
+                # if user is already in the room must be added
                 elif message[0] == "JOINCHATROOM":
                     print("Welcome!")
                     chatroom_name = message[1]
@@ -216,7 +215,7 @@ class ClientThread(threading.Thread):
 
                     if db.is_chatroom_exist(chatroom_name):
 
-                        db.JoinChatRoom(chatroom_name,message[2])
+                        db.JoinChatRoom(chatroom_name, message[2])
                         response = "join-success"
                         logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + str(response))
                         self.tcpClientSocket.send(response.encode())
@@ -244,6 +243,7 @@ class ClientThread(threading.Thread):
                     # Send the response over the TCP socket
 
                     self.tcpClientSocket.send(response.encode())
+
                 elif message[0] == "LeaveRoom":
                     chatroom_name = message[1]
                     username = message[2]
@@ -272,15 +272,24 @@ class ClientThread(threading.Thread):
                     print(f"chatroom name = {chatroom_name} and RoomCreator = {RoomCreator}")
                     if db.is_chatroom_exist(chatroom_name):
                         # Check if the requester is the creator of the chatroom
-                        chatroom_data = db.userDetails(chatroom_name,RoomCreator)
+                        chatroom_data = db.userDetails(chatroom_name, RoomCreator)
                         if chatroom_data == RoomCreator:
                             # Delete the chatroom
                             db.delete_chatroom(chatroom_name, RoomCreator)
-                            response = "delete room "+ chatroom_name +" successfully"
+                            response = "delete room successfully"
+                            print(f"deleted successfully")
+                            logging.info(f"Send to {self.ip}:{str(self.port)} -> {response}")
+                            self.tcpClientSocket.send(response.encode())
                         else:
                             response = "User is not the creator of the chatroom"
+                            print("You are not the creator of the chatroom. Deletion failed.")
+                            logging.info(f"Send to {self.ip}:{str(self.port)} -> {response}")
+                            self.tcpClientSocket.send(response.encode())
                     else:
                         response = "Chatroom does not exist"
+                        print("Chatroom does not exist. Deletion failed.")
+                        logging.info(f"Send to {self.ip}:{str(self.port)} -> {response}")
+                        self.tcpClientSocket.send(response.encode())
 
                     logging.info(f"Send to {self.ip}:{str(self.port)} -> {response}")
                     self.tcpClientSocket.send(response.encode())
@@ -399,7 +408,7 @@ logging.basicConfig(filename="registry.log", level=logging.INFO)
 # Assuming ClassroomChatThread is defined in your code
 
 while inputs:
-   # print("Listening for incoming connections...")
+    # print("Listening for incoming connections...")
     # monitors for the incoming connections
     readable, writable, exceptional = select.select(inputs, [], [])
     for s in readable:
@@ -423,7 +432,7 @@ while inputs:
                     if message[1] in tcpThreads:
                         # resets the timeout for that peer since the hello message is received
                         tcpThreads[message[1]].resetTimeout()
-                        #print("Hello is received from " + message[1])
+                        # print("Hello is received from " + message[1])
                         logging.info(
                             "Received from " + clientAddress[0] + ":" + str(clientAddress[1]) + " -> " + " ".join(
                                 message))
