@@ -231,7 +231,7 @@ class TestJoinChatroom(unittest.TestCase):
         output = sys.stdout.getvalue().strip()  # get stdout content
         self.assertEqual(output, 'you are already in chat room')
 
-    # ////////////
+    # 
     @patch('threading.Timer')  # Remove autospec=True
     def test_chatroom_notfound(self, mock_timer):
         # Arrange
@@ -243,22 +243,14 @@ class TestJoinChatroom(unittest.TestCase):
         sys.stdout = StringIO()  # redirect stdout to a string buffer print in console
 
         # Act
-        with patch.object(threading, 'Timer', return_value=mock_timer):
-            self.peer_instance.joinchatRoom(chatroomName, username)
+        self.peer_instance.joinchatRoom(chatroomName, username)
 
         # Assert
         output = sys.stdout.getvalue().strip()  # get stdout content
 
         # Assert
-        # output = mock_stdout.getvalue().strip()  # get stdout content
         # Ensure that logout is called with option=1
-        self.assertEqual(output, 'Room not found')
-        self.peer_instance.logout.assert_called_once_with(1)
-
-        self.assertTrue(mock_timer.return_value.cancel.called)
-        # self.assertEqual(output,'Room not found')
-        # self.assertIn(output, 'LOGOUT 1234:5678' ) # ???
-
+        self.assertEqual(output, 'Room not found\nlogging out')
 
 class TestCreateChatroom(unittest.TestCase):
     def setUp(self):

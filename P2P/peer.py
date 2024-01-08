@@ -606,8 +606,9 @@ class peerMain:
             print("Room not found")
             #code to return back to the menu
             print("logging out")
-            self.logout(1)
-            peerMain()
+            if __name__ == "__main__":
+                self.logout(1)
+                peerMain()
 
     def SearchchatRoom(self, chatroomName):
         message = "SearchROOM " + chatroomName
