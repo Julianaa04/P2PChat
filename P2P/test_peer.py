@@ -156,14 +156,10 @@ class TestSearchUser(unittest.TestCase):
         password = 'testPassword'
         peerServerPort = 5678
         self.peer_instance.tcpClientSocket.recv.return_value = b'search-success 1234:5678'
-        # sys.stdout = StringIO()  # redirect stdout to a string buffer print in console
-
         # Act
         output = self.peer_instance.searchUser(username)
 
         # Assert
-        # self.peer_instance.tcpClientSocket.send.assert_called_once_with(b'JOIN testUser testPassword') #check function get called
-        # output = sys.stdout.getvalue().strip()  # get stdout content
         self.assertEqual(output, '1234:5678')
 
     def test_search_user_notOnline(self):
@@ -172,14 +168,11 @@ class TestSearchUser(unittest.TestCase):
         password = 'testPassword'
         peerServerPort = 5678
         self.peer_instance.tcpClientSocket.recv.return_value = b'search-user-not-online 1234:5678'
-        # sys.stdout = StringIO()  # redirect stdout to a string buffer print in console
 
         # Act
         output = self.peer_instance.searchUser(username)
 
         # Assert
-        # self.peer_instance.tcpClientSocket.send.assert_called_once_with(b'JOIN testUser testPassword') #check function get called
-        # output = sys.stdout.getvalue().strip()  # get stdout content
         self.assertEqual(output, 0)
 
     def test_search_user_notFound(self):
@@ -428,17 +421,10 @@ class TestDeleteChatroom(unittest.TestCase):
         # Arrange
         chatroomName = 'testChatroomName'
         username = 'testUser'
-        # self.peer_instance.tcpClientSocket.recv.return_value = b'delete room "+ testChatroomName +" successfully'
-
-        # # Act
-        # output = self.peer_instance.deleteChatRoom(chatroomName,username)
-
-        # self.assertEqual(output, 'delete room {chatroomName} successfully')
-
-        self.peer_instance.tcpClientSocket.recv.return_value = b'delete room successfully'
-        sys.stdout = StringIO()  # redirect stdout to a string buffer
 
         # Act
+        self.peer_instance.tcpClientSocket.recv.return_value = b'delete room successfully'
+        sys.stdout = StringIO()  # redirect stdout to a string buffer
         output = self.peer_instance.deleteChatRoom(chatroomName, username)
 
         # Assert
@@ -454,7 +440,6 @@ class TestDeleteChatroom(unittest.TestCase):
 
         # Act
         output = self.peer_instance.deleteChatRoom(chatroomName, username)
-
         self.assertEqual(output, 'User is not the creator of the chatroom')
 
     def test_delete_chatroom_user_notExists(self):
@@ -465,5 +450,4 @@ class TestDeleteChatroom(unittest.TestCase):
 
         # Act
         output = self.peer_instance.deleteChatRoom(chatroomName, username)
-
         self.assertEqual(output, 'Chatroom does not exist')
